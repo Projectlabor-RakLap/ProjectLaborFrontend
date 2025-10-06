@@ -1,13 +1,14 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import logo from 'C:\\Users\\Márk\\Desktop\\Egyetem\\5_felev\\ProjectLaborFrontend\\src\\logo.svg';
+import 'C:\\Users\\Márk\\Desktop\\Egyetem\\5_felev\\ProjectLaborFrontend\\src\\App.css';
 
-function App() {
+function Test() {
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          Étít <code>src/App.tsx</code> and save to reload.
         </p>
         <a
           className="App-link"
@@ -22,4 +23,4 @@ function App() {
   );
 }
 
-export default App;
+export default Test;

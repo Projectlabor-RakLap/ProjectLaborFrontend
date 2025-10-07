@@ -1,67 +1,88 @@
 import { useEffect, useRef, useState } from "react";
-import QrScanner from "qr-scanner";
+import { BrowserMultiFormatReader, IScannerControls } from "@zxing/browser";
 import { useDisclosure } from "@mantine/hooks";
 
-
 const Scanner = () => {
-    const [opened, { open, close }] = useDisclosure(false);
-    const scanner = useRef<QrScanner | null>(null);
-    const videoEl = useRef<HTMLVideoElement>(null);
-    const qrBoxEl = useRef<HTMLDivElement>(null);
-    const [qrOn, setQrOn] = useState<boolean>(true);
+  const [opened, { open, close }] = useDisclosure(false);
+  const [scanning, setScanning] = useState(false);
+  const videoEl = useRef<HTMLVideoElement>(null);
+  const controlsRef = useRef<IScannerControls | null>(null);
 
-     const onScanSuccess = (result: QrScanner.ScanResult) => {
-        console.log("scanned: " + result?.data);
-        scanner.current?.stop();
-    };
+  const onScanSuccess = (text: string) => {
+    console.log("Scanned:", text);
+    stopScanning();
+    close();
+  };
 
-    const onScanFail = (err: string | Error) => {
-        console.log(err);
-    };
+  const startScanning = async () => {
+    if (!videoEl.current) return;
 
-    useEffect(() => {
-        if (opened) {
-            const timeout = setTimeout(() => {
-                if (videoEl.current) {
-                    scanner.current = new QrScanner(videoEl.current, onScanSuccess, {
-                        onDecodeError: onScanFail,
-                        preferredCamera: "environment",
-                        highlightScanRegion: true,
-                        highlightCodeOutline: true,
-                        overlay: qrBoxEl.current || undefined,
-                    });
+    const reader = new BrowserMultiFormatReader();
+    setScanning(true);
 
-                    scanner.current
-                        .start()
-                        .then(() => setQrOn(true))
-                        .catch((err) => {
-                            console.error("Scanner start error:", err);
-                            setQrOn(false);
-                        });
-                }
-            }, 300);
-
-            return () => {
-                scanner.current?.stop();
-                scanner.current = null;
-                clearTimeout(timeout);
-            };
+    try {
+      const controls = await reader.decodeFromVideoDevice(
+        undefined,
+        videoEl.current,
+        (result, error) => {
+          if (result) {
+            onScanSuccess(result.getText());
+          } else if (error && error.name !== "NotFoundException") {
+            console.error("Decode error:", error);
+          }
         }
-    }, [opened]);
+      );
 
-    useEffect(() => {
-        if (!qrOn) alert("The camera is disabled. Please enable it and refresh the site");
-    }, [qrOn]);
+      controlsRef.current = controls;
+    } catch (error) {
+      console.error("Camera start error:", error);
+      setScanning(false);
+    }
+  };
 
+  const stopScanning = () => {
+    controlsRef.current?.stop();
+    controlsRef.current = null;
+    setScanning(false);
+  };
 
-    return <div>
-        QR Code Scanner
-        <br></br>
-        <button onClick={open}>Open QR Scanner</button>
-        {opened && <div style={{ position: "relative", width: "100%", maxWidth: 400, aspectRatio: "1/1" }}>
-            <video ref={videoEl} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </div>}
-    </div>;
-}
+  useEffect(() => {
+    if (opened) startScanning();
+    else stopScanning();
+
+    return () => stopScanning();
+  }, [opened]);
+
+  return (
+    <div>
+      <h3>QR / Barcode Scanner</h3>
+      <button
+        onClick={() => {
+          if (!opened) open();
+        }}
+        disabled={scanning}
+      >
+        {opened ? "Scanning..." : "Open Scanner"}
+      </button>
+
+      {opened && (
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            maxWidth: 400,
+            aspectRatio: "1/1",
+          }}
+        >
+          <video
+            ref={videoEl}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            muted
+          />
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default Scanner;

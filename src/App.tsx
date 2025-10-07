@@ -4,6 +4,7 @@ import Test from './app/test/page';
 import Test2 from './app/test2/page';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Scanner from './pages/qrscanner';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         />
         <Route path="/test" element={<Test/>} />
         <Route path="/test2" element={<Test2/>} />
+        <Route path="/qrscanner" element={<Scanner />} />
       </Routes>
     </Router>
   );

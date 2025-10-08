@@ -1,7 +1,8 @@
 .pill-nav-container {
-  position: absolute;
+  position: fixed;
   top: 0.2em;
   z-index: 99;
+  
 }
 
 @media (max-width: 768px) {

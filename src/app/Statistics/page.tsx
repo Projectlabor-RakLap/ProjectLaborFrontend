@@ -5,21 +5,26 @@ import Select from '@mui/material/Select';
 import IWarehouse from '../../Interfaces/IWarehouse';
 import IProduct from '../../Interfaces/IProduct';
 import IStockChange from '../../Interfaces/IStockChange';
+import IStock from '../../Interfaces/IStock';
 import MenuItem from '@mui/material/MenuItem';
 import { LineChart } from '@mui/x-charts/LineChart';
 import InputLabel from '@mui/material/InputLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import { PieChart } from '@mui/x-charts';
 
 function Statistics() {
   const [warehouses, setWarehouses] = React.useState<IWarehouse[]>([]);
   const [products, setProducts] = React.useState<IProduct[]>([]);
   const [stockChanges, setStockChanges] = React.useState<IStockChange[]>([]);
+  const [stock, setStock] = React.useState<IStock>();
   const [selectedWarehouse, setSelectedWarehouse] = React.useState<string | ''>('');
   const [selectedProduct, setSelectedProduct] = React.useState<string | ''>('');
   const [loadingWarehouses, setLoadingWarehouses] = React.useState(true);
   const [loadingProducts, setLoadingProducts] = React.useState(false);
   const [loadingStockChanges, setLoadingStockChanges] = React.useState(false);
+  const [loadingStock, setLoadingStock] = React.useState(false);
 
   useEffect(() => {
     const fetchWarehouses = async () => {
@@ -80,15 +85,34 @@ function Statistics() {
         );
         const data = await response.json();
         setStockChanges(data);
-        console.log('Stock Changes:', data);
       } catch (error) {
         console.error('Error fetching stock changes:', error);
-      } finally {
+      }finally {
         setLoadingStockChanges(false);
       }
     };
 
     fetchStockChanges();
+  }, [selectedWarehouse, selectedProduct]);
+
+  useEffect(() => {
+    const fetchStock = async () => {
+      if (!selectedWarehouse || !selectedProduct) return;
+      setLoadingStock(true);
+      try {
+        const response = await fetch(
+          `https://localhost:7116/api/stock/product/${selectedProduct}`
+        );
+        const data = await response.json();
+        setStock(data);
+        console.log(data);
+      } catch (error) {
+        console.error('Error fetching stock:', error);
+      } finally {
+        setLoadingStock(false);
+      }
+    };
+    fetchStock();
   }, [selectedWarehouse, selectedProduct]);
 
   const chartData = stockChanges
@@ -193,45 +217,110 @@ function Statistics() {
 
         {selectedProduct && (
           <>
-            {loadingStockChanges ? (
+            {loadingStockChanges || loadingStock ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
                 <CircularProgress sx={{ color: 'white' }} />
               </Box>
             ) : chartData.length > 0 ? (
-              <div
-                style={{
-                  width: '600px',
-                  height: '400px',
-                  backgroundColor: 'white',
-                  borderRadius: '12px',
-                  marginTop: '30px',
-                }}
+              <Grid
+                container
+                spacing={3}
+                justifyContent="center"
+                alignItems="flex-start"
+                sx={{ mt: 3 }}
               >
-                <LineChart
-                  xAxis={[
-                    {
-                      data: chartData.map((d) => d.date),
-                      scaleType: 'time',
-                      label: 'Date',
-                      valueFormatter: (value) =>
-                        new Date(value).toLocaleDateString('en-GB', {
-                          day: '2-digit',
-                          month: 'short',
-                        }),
-                    },
-                  ]}
-                  series={[
-                    {
-                      data: chartData.map((d) => d.quantity),
-                      label: 'Stock Change',
-                      showMark: true,
-                      color: '#1976d2',
-                    },
-                  ]}
-                  yAxis={[{ label: 'Quantity Change' }]}
-                  grid={{ vertical: true, horizontal: true }}
-                />
-              </div>
+                <Grid>
+                  <div
+                    style={{
+                      width: '600px',
+                      height: '400px',
+                      backgroundColor: 'white',
+                      borderRadius: '12px',
+                      padding: '10px',
+                    }}
+                  >
+                    <LineChart
+                      xAxis={[
+                        {
+                          data: chartData.map((d) => d.date),
+                          scaleType: 'time',
+                          label: 'Date',
+                          valueFormatter: (value) =>
+                            new Date(value).toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: 'short',
+                            }),
+                        },
+                      ]}
+                      series={[
+                        {
+                          data: chartData.map((d) => d.quantity),
+                          label: 'Stock Change',
+                          showMark: true,
+                          color: '#1976d2',
+                        },
+                      ]}
+                      yAxis={[{ label: 'Quantity Change' }]}
+                      grid={{ vertical: true, horizontal: true }}
+                    />
+                  </div>
+                </Grid>
+                {stock && (
+                  <>
+                    <Grid>
+                      <PieChart
+                        colors={['green', 'blue']}
+                        series={[
+                          {
+                            data: [
+                              {
+                                id: 0,
+                                value: stock.stockInWarehouse,
+                                label: 'In Warehouse',
+                              },
+                              {
+                                id: 1,
+                                value:
+                                  stock.warehouseCapacity - stock.stockInWarehouse,
+                                label: 'Free Space',
+                              },
+                            ],
+                          },
+                        ]}
+                        
+                        width={250}
+                        height={250}
+                      />
+                      <p style={{ color: 'white' }}>Warehouse Capacity</p>
+                    </Grid>
+
+                    <Grid>
+                      <PieChart
+                        colors={['green', 'blue']}
+                        series={[
+                          {
+                            data: [
+                              {
+                                id: 0,
+                                value: stock.stockInStore,
+                                label: 'In Store',
+                              },
+                              {
+                                id: 1,
+                                value: stock.storeCapacity - stock.stockInStore,
+                                label: 'Free Space',
+                              },
+                            ],
+                          },
+                        ]}
+                        width={250}
+                        height={250}
+                      />
+                      <p style={{ color: 'white' }}>Store Capacity</p>
+                    </Grid>
+                  </>
+                )}
+              </Grid>
             ) : (
               <p>No stock changes available.</p>
             )}

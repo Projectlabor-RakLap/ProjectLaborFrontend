@@ -21,21 +21,19 @@ interface VirtuosoTableProps<T> {
   columns: ColumnData<T>[];
   height?: number | string;
   onUpdate?: (updated: T) => void;
+  actionCell?: (row: T) => React.ReactNode; // <--- ideadjuk a gombot
 }
-
-export default function VirtuosoTable<T extends object>({
+export default function VirtuosoTable<T extends { id: number }>({
   data,
   columns,
   height = 400,
-  onUpdate
+  actionCell,
 }: VirtuosoTableProps<T>) {
   const VirtuosoTableComponents: TableComponents<T> = {
     Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
       <TableContainer component={Paper} {...props} ref={ref} />
     )),
-    Table: (props) => (
-      <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
-    ),
+    Table: (props) => <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />,
     TableHead: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
       <TableHead {...props} ref={ref} />
     )),
@@ -65,40 +63,28 @@ export default function VirtuosoTable<T extends object>({
     </TableRow>
   );
 
-  const rowContent = (_index: number, row: T) => (
-    <>
-      {columns.map((col) => (
-        <TableCell
-          key={String(col.dataKey)}
-          style={{ backgroundColor: 'white', textAlign: col.numeric ? 'right' : 'left' }}
-        >
-          {col.dataKey === 'id' ? (
-            <UpdateWarehouseDialog
-              id={(row as any).id}
-              text="Update"
-              dialogTitle="Warehouse update"
-              dialogContent="Update the {name} warehouse"
-              acceptText="Update"
-              cancelText="Cancel"
-              initialValues={row}
-              onUpdate={(updated) => onUpdate && onUpdate(updated)}
-            />
-          ) : (
-            String(row[col.dataKey])
-          )}
-        </TableCell>
-      ))}
-    </>
-  );
+const rowContent = (_index: number, row: T) => (
+  <>
+    {columns.map((col) => (
+      <TableCell
+        key={String(col.dataKey)}
+        style={{ backgroundColor: 'white', textAlign: col.numeric ? 'right' : 'left' }}
+      >
+        {col.dataKey === 'id' && actionCell ? (
+          actionCell(row) // ide kerül a gomb
+        ) : (
+          String(row[col.dataKey])
+        )}
+      </TableCell>
+    ))}
+  </>
+);
 
   return (
     <Paper style={{ height, width: '100%' }}>
-      <TableVirtuoso
-        data={data}
-        components={VirtuosoTableComponents}
-        fixedHeaderContent={fixedHeaderContent}
-        itemContent={rowContent}
-      />
+      <TableVirtuoso data={data} components={VirtuosoTableComponents} fixedHeaderContent={fixedHeaderContent} itemContent={rowContent} />
     </Paper>
   );
 }
+
+

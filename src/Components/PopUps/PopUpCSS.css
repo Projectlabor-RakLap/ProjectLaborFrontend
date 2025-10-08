@@ -1,0 +1,22 @@
+.MuiButton-root.updateButton:hover{
+    color: white;
+    background-color: rgb(25, 118, 210);
+}
+
+.MuiButton-root.acceptButton{
+    color:black;
+    background-color: white;
+}
+.MuiButton-root.acceptButton:hover{
+    color:white;
+    background-color: rgb(25, 118, 210);
+}
+
+.MuiButton-root.cancelButton{
+    color:red;
+    background-color: white;
+}
+.MuiButton-root.cancelButton:hover{
+    color:white;
+    background-color: red;
+}

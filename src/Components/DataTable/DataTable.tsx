@@ -7,126 +7,84 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
-import Chance from 'chance';
+import UpdateWarehouseDialog from '../PopUps/UpdateWarehousePopUp';
 
-interface Data {
-  id: number;
-  firstName: string;
-  lastName: string;
-  age: number;
-  phone: string;
-  state: string;
-}
-
-interface ColumnData {
-  dataKey: keyof Data;
+export interface ColumnData<T> {
+  dataKey: keyof T;
   label: string;
-  numeric?: boolean;
   width?: number;
+  numeric?: boolean;
 }
 
-const chance = new Chance(42);
-
-function createData(id: number): Data {
-  return {
-    id,
-    firstName: chance.first(),
-    lastName: chance.last(),
-    age: chance.age(),
-    phone: chance.phone(),
-    state: chance.state({ full: true }),
+interface VirtuosoTableProps<T> {
+  data: T[];
+  columns: ColumnData<T>[];
+  height?: number | string;
+  onUpdate?: (updated: T) => void;
+  actionCell?: (row: T) => React.ReactNode; // <--- ideadjuk a gombot
+}
+export default function VirtuosoTable<T extends { id: number }>({
+  data,
+  columns,
+  height = 400,
+  actionCell,
+}: VirtuosoTableProps<T>) {
+  const VirtuosoTableComponents: TableComponents<T> = {
+    Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
+      <TableContainer component={Paper} {...props} ref={ref} />
+    )),
+    Table: (props) => <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />,
+    TableHead: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
+      <TableHead {...props} ref={ref} />
+    )),
+    TableRow,
+    TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
+      <TableBody {...props} ref={ref} />
+    )),
   };
-}
 
-const columns: ColumnData[] = [
-  {
-    width: 100,
-    label: 'First Name',
-    dataKey: 'firstName',
-  },
-  {
-    width: 100,
-    label: 'Last Name',
-    dataKey: 'lastName',
-  },
-  {
-    width: 50,
-    label: 'Age',
-    dataKey: 'age',
-    numeric: true,
-  },
-  {
-    width: 110,
-    label: 'State',
-    dataKey: 'state',
-  },
-  {
-    width: 130,
-    label: 'Phone Number',
-    dataKey: 'phone',
-  },
-];
-
-const rows: Data[] = Array.from({ length: 200 }, (_, index) => createData(index));
-
-const VirtuosoTableComponents: TableComponents<Data> = {
-  Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
-    <TableContainer component={Paper} {...props} ref={ref} />
-  )),
-  Table: (props) => (
-    <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
-  ),
-  TableHead: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
-    <TableHead {...props} ref={ref} />
-  )),
-  TableRow,
-  TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
-    <TableBody {...props} ref={ref} />
-  )),
-};
-
-function fixedHeaderContent() {
-  return (
+  const fixedHeaderContent = () => (
     <TableRow>
-      {columns.map((column) => (
+      {columns.map((col) => (
         <TableCell
-          key={column.dataKey}
-          variant="head"
-          align={column.numeric || false ? 'right' : 'left'}
-          style={{ width: column.width }}
-          sx={{ backgroundColor: 'background.paper' }}
+          key={String(col.dataKey)}
+          style={{
+            width: col.width,
+            position: 'sticky',
+            top: 0,
+            backgroundColor: 'grey',
+            zIndex: 1,
+            textAlign: col.numeric ? 'right' : 'left',
+          }}
         >
-          {column.label}
+          {col.label}
         </TableCell>
       ))}
     </TableRow>
   );
-}
 
-function rowContent(_index: number, row: Data) {
-  return (
-    <React.Fragment>
-      {columns.map((column) => (
-        <TableCell
-          key={column.dataKey}
-          align={column.numeric || false ? 'right' : 'left'}
-        >
-          {row[column.dataKey]}
-        </TableCell>
-      ))}
-    </React.Fragment>
-  );
-}
+const rowContent = (_index: number, row: T) => (
+  <>
+    {columns.map((col) => (
+      <TableCell
+        key={String(col.dataKey)}
+        style={{ backgroundColor: 'white', textAlign: col.numeric ? 'right' : 'left' }}
+      >
+        {col.dataKey === 'id' && actionCell ? (
+          actionCell(row) // ide kerül a gomb
+        ) : (
+          String(row[col.dataKey])
+        )}
+      </TableCell>
+    ))}
+  </>
+);
 
-export default function VirtualizedTable() {
   return (
-    <Paper style={{ height: 400, width: '100%' }}>
-      <TableVirtuoso
-        data={rows}
-        components={VirtuosoTableComponents}
-        fixedHeaderContent={fixedHeaderContent}
-        itemContent={rowContent}
-      />
+    <Paper style={{ height, width: '100%' }}>
+      <TableVirtuoso data={data} components={VirtuosoTableComponents} fixedHeaderContent={fixedHeaderContent} itemContent={rowContent} />
     </Paper>
   );
 }
+
+

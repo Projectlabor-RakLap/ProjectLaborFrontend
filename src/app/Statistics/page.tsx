@@ -12,12 +12,14 @@ import InputLabel from '@mui/material/InputLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import { PieChart } from '@mui/x-charts';
+import { PieChart, SparkLineChart } from '@mui/x-charts';
+import { Card, CardContent, Typography } from '@mui/material';
 
 function Statistics() {
   const [warehouses, setWarehouses] = React.useState<IWarehouse[]>([]);
   const [products, setProducts] = React.useState<IProduct[]>([]);
   const [stockChanges, setStockChanges] = React.useState<IStockChange[]>([]);
+  const [weeklyData, setWeeklyData] = React.useState<IStockChange[]>([]);
   const [stock, setStock] = React.useState<IStock>();
   const [selectedWarehouse, setSelectedWarehouse] = React.useState<string | ''>('');
   const [selectedProduct, setSelectedProduct] = React.useState<string | ''>('');
@@ -25,6 +27,7 @@ function Statistics() {
   const [loadingProducts, setLoadingProducts] = React.useState(false);
   const [loadingStockChanges, setLoadingStockChanges] = React.useState(false);
   const [loadingStock, setLoadingStock] = React.useState(false);
+  const [loadingWeeklyData, setLoadingWeeklyData] = React.useState(false);
 
   useEffect(() => {
     const fetchWarehouses = async () => {
@@ -73,6 +76,26 @@ function Statistics() {
   const handleChangeProduct = (event: any) => {
     setSelectedProduct(event.target.value);
   };
+
+  useEffect(() => {
+    const fetchWeeklyData = async () => {
+      if (!selectedWarehouse) return;
+      setLoadingWeeklyData(true);
+      try {
+        const response = await fetch(
+          `https://localhost:7116/api/stockchange/previous-week/${selectedWarehouse}`
+        );
+        const data = await response.json();
+        setWeeklyData(data);
+      } catch (error) {
+        console.error('Error fetching weekly data:', error);
+      } finally {
+        setLoadingWeeklyData(false);
+      }
+    };
+
+    fetchWeeklyData();
+  }, [selectedWarehouse]);
 
   useEffect(() => {
     const fetchStockChanges = async () => {
@@ -124,6 +147,54 @@ function Statistics() {
       quantity: item.quantity,
     }));
 
+    const weeklySalesData = React.useMemo(() => {
+    if (!weeklyData.length) return null;
+
+    const dailySales = weeklyData.reduce((acc, item) => {
+      const date = new Date(item.changeDate);
+      const dayKey = date.toLocaleDateString('en-US', { weekday: 'short' });
+      
+      if (!acc[dayKey]) {
+        acc[dayKey] = {
+          day: dayKey,
+          sales: 0,
+          date: date
+        };
+      }
+      
+      acc[dayKey].sales += Math.abs(item.quantity);
+      
+      return acc;
+    }, {} as Record<string, { day: string; sales: number; date: Date }>);
+
+    return Object.values(dailySales)
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .map(item => item.sales);
+  }, [weeklyData]);
+
+  const dayLabels = React.useMemo(() => {
+    if (!weeklyData.length) return [];
+    
+    const dailySales = weeklyData.reduce((acc, item) => {
+      const date = new Date(item.changeDate);
+      const dayKey = date.toLocaleDateString('en-US', { weekday: 'short' });
+      
+      if (!acc[dayKey]) {
+        acc[dayKey] = date;
+      }
+      return acc;
+    }, {} as Record<string, Date>);
+
+    return Object.entries(dailySales)
+      .sort((a, b) => a[1].getTime() - b[1].getTime())
+      .map(([day]) => day);
+  }, [weeklyData]);
+
+  const totalWeeklySales = React.useMemo(() => {
+    if (!weeklyData.length) return 0;
+    return weeklyData.reduce((total, item) => total + Math.abs(item.quantity), 0);
+  }, [weeklyData]);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -132,7 +203,7 @@ function Statistics() {
         <InputLabel
           variant="standard"
           htmlFor="warehouse-select"
-          sx={{ color: 'white', mb: 1 }}
+          sx={{ color: 'white', mb: 1, marginTop: 10 }}
         >
           Warehouse
         </InputLabel>
@@ -215,6 +286,51 @@ function Statistics() {
           </>
         )}
 
+        {selectedWarehouse && (
+          <Card sx={{ maxWidth: 400, mx: 'auto', my: 3, bgcolor: 'background.paper' }}>
+            <CardContent>
+              <Typography variant="h6" component="h2" gutterBottom align="center">
+                Previous Week Sales
+              </Typography>
+              
+              {loadingWeeklyData ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : weeklySalesData && weeklySalesData.length > 0 ? (
+                <>
+                  <SparkLineChart
+                    data={weeklySalesData}
+                    height={150}
+                    area
+                    showTooltip
+                    showHighlight
+                  />
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                    {dayLabels.map((day, index) => (
+                      <Typography key={day} variant="caption" align="center">
+                        {day}
+                      </Typography>
+                    ))}
+                  </Box>
+                  
+                  <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+                    Total Sales: <strong>{totalWeeklySales}</strong> units
+                  </Typography>
+                  <Typography variant="caption" display="block" align="center" color="text.secondary">
+                    {weeklyData.length} sales transactions
+                  </Typography>
+                </>
+              ) : (
+                <Typography variant="body2" align="center" color="text.secondary" sx={{ py: 4 }}>
+                  No sales data available for previous week
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {selectedProduct && (
           <>
             {loadingStockChanges || loadingStock ? (
@@ -267,9 +383,11 @@ function Statistics() {
                 </Grid>
                 {stock && (
                   <>
+                  <Card sx={{ maxWidth: 400, mx: 'auto', my: 3, bgcolor: 'background.paper' }}>
+                  <CardContent>
                     <Grid>
                       <PieChart
-                        colors={['green', 'blue']}
+                        colors={['green', 'blue', 'red']}
                         series={[
                           {
                             data: [
@@ -291,9 +409,13 @@ function Statistics() {
                         width={250}
                         height={250}
                       />
-                      <p style={{ color: 'white' }}>Warehouse Capacity</p>
+                      <p style={{ color: 'black' }}>Warehouse Capacity</p>
                     </Grid>
-
+                    </CardContent>
+                    </Card>
+                    
+                    <Card sx={{ maxWidth: 400, mx: 'auto', my: 3, bgcolor: 'background.paper' }}>
+                    <CardContent>
                     <Grid>
                       <PieChart
                         colors={['green', 'blue']}
@@ -316,8 +438,10 @@ function Statistics() {
                         width={250}
                         height={250}
                       />
-                      <p style={{ color: 'white' }}>Store Capacity</p>
+                      <p style={{ color: 'black' }}>Store Capacity</p>
                     </Grid>
+                    </CardContent>
+                    </Card>
                   </>
                 )}
               </Grid>

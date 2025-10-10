@@ -3,5 +3,5 @@ export interface IProduct{
     ean: string;
     name: string;
     description: string
-    imageBase64: string | null;
+    image: string | null;
 }

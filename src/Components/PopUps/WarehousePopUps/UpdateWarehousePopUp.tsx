@@ -1,0 +1,148 @@
+import * as React from 'react';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Alert from '@mui/material/Alert';
+import BlockIcon from '@mui/icons-material/Block';
+import '../PopUpCSS.css';
+import { IWarehouse } from '../../../interfaces/IWarehouse';
+
+interface FormDialogProps<T> {
+  id: number;
+  text: string;
+  dialogTitle: string;
+  dialogContent: string;
+  acceptText: string;
+  cancelText: string;
+  initialValues: T;
+  apiUrl:string;
+  onUpdate?: (updated: T) => void;
+}
+
+export default function UpdateWarehouseDialog<T>({
+  id,
+  text,
+  dialogTitle,
+  dialogContent,
+  acceptText,
+  cancelText,
+  initialValues,
+  apiUrl,
+  onUpdate
+}: FormDialogProps<T>) {
+  const [open, setOpen] = React.useState(false);
+  const [alertMessage, setAlertMessage] = React.useState<string | null>(null);
+  const [alertSeverity, setAlertSeverity] = React.useState<'success' | 'error'>('success');
+  const handleClickOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const updateWarehouse = async (id:number ,updatedData: Partial<IWarehouse>) => {
+  try {
+    const response = await fetch(`${apiUrl}/api/warehouse/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP error! Status: ${response.status}`;
+      try {
+        const text = await response.text();
+        if (text) {
+          const data = JSON.parse(text);
+          if (data?.message) errorMessage = data.message;
+          else errorMessage = text;
+        }
+      } catch {}
+      throw new Error(errorMessage);
+    }
+    if (response.status >= 200 && response.status < 300) {
+      setAlertSeverity('success');
+      setAlertMessage('Warehouse created successfully!');
+      return true;
+    }
+    const updatedWarehouse: IWarehouse = await response.json();
+    onUpdate?.(updatedWarehouse as any);
+
+    setAlertSeverity('success');
+    setAlertMessage('Warehouse created successfully!');
+
+    return true;
+  } catch (error: any) {
+    console.error("Error creating warehouse:", error.message);
+    setAlertSeverity('error');
+    setAlertMessage(error.message);
+    return false; 
+  }
+};
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const formJson = Object.fromEntries(formData.entries());
+    const success = await updateWarehouse(id,formJson);
+    if (success) {
+      window.location.reload();
+    }
+  };
+
+  return (
+    <>
+      <Button variant="outlined" onClick={handleClickOpen} className="updateButton">
+        {text}
+      </Button>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{dialogTitle}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {dialogContent.replace('{name}', (initialValues as any).name)}
+            {alertMessage && (
+            <Alert
+              icon={<BlockIcon fontSize="inherit" />}
+              severity={alertSeverity}
+              onClose={() => setAlertMessage(null)}
+              style={{ marginBottom: '1rem' }}
+            >
+              {alertMessage}
+            </Alert>
+          )}
+          </DialogContentText>
+          <form onSubmit={handleSubmit} id="warehouse-form">
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              name="name"
+              label="Name"
+              type="text"
+              fullWidth
+              variant="standard"
+              defaultValue={(initialValues as any).name}
+            />
+            <TextField
+              margin="dense"
+              id="location"
+              name="location"
+              label="Location"
+              type="text"
+              fullWidth
+              variant="standard"
+              defaultValue={(initialValues as any).location}
+            />
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} className="cancelButton">{cancelText}</Button>
+          <Button type="submit" form="warehouse-form" className="acceptButton">{acceptText}</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}

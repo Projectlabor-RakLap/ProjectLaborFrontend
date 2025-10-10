@@ -7,7 +7,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
-import UpdateWarehouseDialog from '../PopUps/UpdateWarehousePopUp';
 
 export interface ColumnData<T> {
   dataKey: keyof T;
@@ -21,13 +20,18 @@ interface VirtuosoTableProps<T> {
   columns: ColumnData<T>[];
   height?: number | string;
   onUpdate?: (updated: T) => void;
-  actionCell?: (row: T) => React.ReactNode; // <--- ideadjuk a gombot
+  updateButton?: (row: T) => React.ReactNode;
+  deleteButton?: (row: T) => React.ReactNode;
+  createButton?:  React.ReactNode;
 }
+
 export default function VirtuosoTable<T extends { id: number }>({
   data,
   columns,
   height = 400,
-  actionCell,
+  updateButton,
+  deleteButton,
+  createButton
 }: VirtuosoTableProps<T>) {
   const VirtuosoTableComponents: TableComponents<T> = {
     Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
@@ -43,26 +47,25 @@ export default function VirtuosoTable<T extends { id: number }>({
     )),
   };
 
-  const fixedHeaderContent = () => (
-    <TableRow>
-      {columns.map((col) => (
-        <TableCell
-          key={String(col.dataKey)}
-          style={{
-            width: col.width,
-            position: 'sticky',
-            top: 0,
-            backgroundColor: 'grey',
-            zIndex: 1,
-            textAlign: col.numeric ? 'right' : 'left',
-          }}
-        >
-          {col.label}
-        </TableCell>
-      ))}
-    </TableRow>
-  );
-
+const fixedHeaderContent = () => (
+  <TableRow>
+    {columns.map((col) => (
+      <TableCell
+        key={String(col.dataKey)}
+        style={{
+          width: col.width,
+          position: 'sticky',
+          top: 0,
+          backgroundColor: 'grey',
+          zIndex: 1,
+          textAlign: col.numeric ? 'right' : 'left',
+        }}
+      >
+        {col.label === 'id' && createButton ? createButton : col.label}
+      </TableCell>
+    ))}
+  </TableRow>
+);
 const rowContent = (_index: number, row: T) => (
   <>
     {columns.map((col) => (
@@ -70,8 +73,11 @@ const rowContent = (_index: number, row: T) => (
         key={String(col.dataKey)}
         style={{ backgroundColor: 'white', textAlign: col.numeric ? 'right' : 'left' }}
       >
-        {col.dataKey === 'id' && actionCell ? (
-          actionCell(row) // ide kerül a gomb
+        {col.dataKey === 'id' && (updateButton || deleteButton) ? (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {updateButton && updateButton(row)}
+            {deleteButton && deleteButton(row)}
+          </div>
         ) : (
           String(row[col.dataKey])
         )}

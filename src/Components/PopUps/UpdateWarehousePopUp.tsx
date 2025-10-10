@@ -50,9 +50,7 @@ export default function UpdateWarehouseDialog<T>({
 
       const updatedWarehouse: IWarehouse = await response.json();
 
-      // Frissítés a callbackkel
       onUpdate?.(updatedWarehouse as any);
-      console.log("Warehouse updated:", updatedWarehouse);
     } catch (error) {
       console.error("Error updating warehouse:", error);
     }

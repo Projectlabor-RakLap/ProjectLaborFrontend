@@ -31,7 +31,8 @@ export default function Warehouses() {
   useEffect(() => {
     const fetchWarehouses = async () => {
       try {
-        const response = await fetch("https://localhost:7116/api/warehouse", {
+        const apiBaseUrl = `https://${window.location.hostname}:7116`;
+        const response = await fetch(`${apiBaseUrl}/api/warehouse`, {
           headers: { Accept: "application/json" },
         });
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);

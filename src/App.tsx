@@ -6,13 +6,15 @@ import Warehouses from './app/Warehouses/page';
 import Admin from './app/Admin/page';
 import Statistics from './app/Statistics/page';
 import Profile from './app/Profile/page';
-
+import Products
+ from './app/Products/page';
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/warehouse" element={<Warehouses />} />
+        <Route path="/products" element={<Products />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/statistics" element={<Statistics />} />
         <Route path="/profile" element={<Profile />} />

@@ -8,8 +8,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Alert from '@mui/material/Alert';
 import BlockIcon from '@mui/icons-material/Block';
-import './PopUpCSS.css';
-import { IWarehouse } from '../../interfaces/IWarehouse';
+import '../PopUpCSS.css';
+import { IWarehouse } from '../../../interfaces/IWarehouse';
 
 interface FormDialogProps<T> {
   text: string;
@@ -17,6 +17,7 @@ interface FormDialogProps<T> {
   dialogContent: string;
   acceptText: string;
   cancelText: string;
+  apiUrl: string
   onUpdate?: (updated: T) => void;
 }
 
@@ -26,6 +27,7 @@ export default function CreateWarehouseDialog<T>({
   dialogContent,
   acceptText,
   cancelText,
+  apiUrl,
   onUpdate,
 }: FormDialogProps<T>) {
   const [open, setOpen] = React.useState(false);
@@ -37,7 +39,7 @@ export default function CreateWarehouseDialog<T>({
 
   const createWarehouse = async (updatedData: Partial<IWarehouse>) => {
   try {
-    const response = await fetch(`https://localhost:7116/api/warehouse`, {
+    const response = await fetch(`${apiUrl}/api/warehouse`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

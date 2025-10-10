@@ -13,6 +13,7 @@ function PillNavFull() {
       items={[
         { label: 'Home', href: '/' },
         { label: 'Warehouse', href: '/warehouse' },
+        { label: 'Products', href: '/products' },
         { label: 'Statistics', href: '/statistics' },
         { label: 'Admin', href: '/admin' },
         { label: 'Profile', href: '/profile' }

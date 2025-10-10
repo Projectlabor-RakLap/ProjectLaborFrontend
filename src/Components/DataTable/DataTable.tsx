@@ -62,6 +62,7 @@ const fixedHeaderContent = () => (
         }}
       >
         {col.label === 'id' && createButton ? createButton : col.label}
+        
       </TableCell>
     ))}
   </TableRow>
@@ -79,7 +80,8 @@ const rowContent = (_index: number, row: T) => (
             {deleteButton && deleteButton(row)}
           </div>
         ) : (
-          String(row[col.dataKey])
+          col.dataKey === 'image' ? (<img src={`data:image/png;base64,${String(row[col.dataKey])}`} alt="Picture" />) : String(row[col.dataKey])
+          
         )}
       </TableCell>
     ))}

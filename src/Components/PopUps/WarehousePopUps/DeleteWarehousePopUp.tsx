@@ -5,8 +5,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import './PopUpCSS.css';
-import { IWarehouse } from '../../interfaces/IWarehouse';
+import '../PopUpCSS.css';
+import { IWarehouse } from '../../../interfaces/IWarehouse';
 
 interface FormDialogProps<T> {
   id: number;
@@ -15,6 +15,7 @@ interface FormDialogProps<T> {
   dialogContent: string;
   acceptText: string;
   cancelText: string;
+  apiUrl:string;
   onUpdate?: (updated: T) => void;
 }
 
@@ -25,6 +26,7 @@ export default function DeleteWarehouseDialog<T>({
   dialogContent,
   acceptText,
   cancelText,
+  apiUrl,
   onUpdate
 }: FormDialogProps<T>) {
   const [open, setOpen] = React.useState(false);
@@ -34,7 +36,7 @@ export default function DeleteWarehouseDialog<T>({
 
   const deleteWarehouse = async (id:number) => {
     try {
-      const response = await fetch(`https://localhost:7116/api/warehouse/${id}`, {
+      const response = await fetch(`${apiUrl}/api/warehouse/${id}`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",

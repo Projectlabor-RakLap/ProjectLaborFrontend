@@ -3,9 +3,11 @@ import PillNavFull from '../../Components/NavBar/PillNav/PillNavWithItems';
 import { IWarehouse } from '../../interfaces/IWarehouse';
 import VirtuosoTable, { ColumnData } from '../../Components/DataTable/DataTable';
 import UpdateWarehouseDialog from '../../Components/PopUps/UpdateWarehousePopUp';
+import DeleteWarehouseDialog from '../../Components/PopUps/DeleteWarehousePopUp';
+import CreateWarehouseDialog from '../../Components/PopUps/CreateWarehousePopUp';
 
 const warehouseColumns: ColumnData<IWarehouse>[] = [
-  { dataKey: 'id', label: 'Update', width: 50 },
+  { dataKey: 'id', label: 'id', width: 50 },
   { dataKey: 'name', label: 'Name', width: 150 },
   { dataKey: 'location', label: 'Location', width: 150 },
 ];
@@ -56,8 +58,8 @@ export default function Warehouses() {
           data={warehouses}
           columns={warehouseColumns}
           height={height * 0.85}
-          onUpdate={handleUpdate} // frissíti a táblát
-          actionCell={(row) => (
+          onUpdate={handleUpdate}
+          updateButton={(row) => (
             <UpdateWarehouseDialog
               id={row.id}
               text="Update"
@@ -69,6 +71,26 @@ export default function Warehouses() {
               onUpdate={handleUpdate}
             />
           )}
+          deleteButton={(row) => (
+          <DeleteWarehouseDialog
+            id={row.id}
+            text="Delete"
+            dialogTitle="Delete warehouse"
+            dialogContent={`Are you sure you want to delete ${row.name} warehouse?`}
+            acceptText="Delete"
+            cancelText="Cancel"
+            onUpdate={handleUpdate}
+          />)}
+          createButton={(
+            <CreateWarehouseDialog
+            text="Create"
+            dialogTitle="Create warehouse"
+            dialogContent={`Please add a name and a location`}
+            acceptText="Create"
+            cancelText="Cancel"
+            onUpdate={handleUpdate}
+            />
+          )} 
         />
       </header>
     </div>

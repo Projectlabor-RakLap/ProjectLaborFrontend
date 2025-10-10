@@ -1,8 +1,4 @@
-.MuiButton-root.updateButton:hover{
-    color: white;
-    background-color: rgb(25, 118, 210);
-}
-
+/* accept button -- black text, when hovered white text with blue background */
 .MuiButton-root.acceptButton{
     color:black;
     background-color: white;
@@ -12,6 +8,17 @@
     background-color: rgb(25, 118, 210);
 }
 
+/* update button -- black text, when hovered white text with blue background */
+.MuiButton-root.updateButton{
+    color:black;
+    background-color: white;
+}
+.MuiButton-root.updateButton:hover{
+    color: white;
+    background-color: rgb(25, 118, 210);
+}
+
+/* cancel button -- WARNING COLORS -- red text, when hovered white text with red background */
 .MuiButton-root.cancelButton{
     color:red;
     background-color: white;
@@ -19,4 +26,37 @@
 .MuiButton-root.cancelButton:hover{
     color:white;
     background-color: red;
+}
+
+/* cancel delete button -- black text, when hovered white text with blue background */
+.MuiButton-root.cancelDeleteButton{
+    color:black;
+    background-color: white;
+}
+.MuiButton-root.cancelDeleteButton:hover{
+    color:white;
+    background-color: blue;
+}
+
+/* delete button -- WARNING COLORS -- red background with white text, when hovered white background with red text */
+.MuiButton-root.deleteButton{
+    color:white;
+    background-color: red;
+    border: 0px;
+}
+.MuiButton-root.deleteButton:hover{
+    color:red;
+    background-color: white;
+}
+
+/* create button -- black text with white background and green border, when hovered green background with white text */
+.MuiButton-root.createButton{
+    color:black;
+    background-color: white;
+    border-width: 1px;
+    border-color: green;
+}
+.MuiButton-root.createButton:hover{
+    color:white;
+    background-color: green;
 }

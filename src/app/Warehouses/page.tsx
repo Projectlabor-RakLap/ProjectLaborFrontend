@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PillNavFull from '../../Components/NavBar/PillNav/PillNavWithItems';
 import { IWarehouse } from '../../interfaces/IWarehouse';
 import VirtuosoTable, { ColumnData } from '../../Components/DataTable/DataTable';
-import UpdateWarehouseDialog from '../../Components/PopUps/UpdateWarehousePopUp';
+import UpdateWarehouseDialog from '../../Components/PopUps/WarehousePopUp/UpdateWarehousePopUp';
 
 const warehouseColumns: ColumnData<IWarehouse>[] = [
   { dataKey: 'id', label: 'Update', width: 50 },

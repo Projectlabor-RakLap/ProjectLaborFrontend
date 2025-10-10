@@ -7,7 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { TableVirtuoso, TableComponents } from 'react-virtuoso';
-import UpdateWarehouseDialog from '../PopUps/UpdateWarehousePopUp';
+import UpdateWarehouseDialog from '../PopUps/WarehousePopUp/UpdateWarehousePopUp';
 
 export interface ColumnData<T> {
   dataKey: keyof T;

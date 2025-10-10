@@ -7,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Alert from '@mui/material/Alert';
-import CheckIcon from '@mui/icons-material/Check';
+import BlockIcon from '@mui/icons-material/Block';
 import './PopUpCSS.css';
 import { IWarehouse } from '../../interfaces/IWarehouse';
 
@@ -61,7 +61,7 @@ export default function CreateWarehouseDialog<T>({
     if (response.status >= 200 && response.status < 300) {
       setAlertSeverity('success');
       setAlertMessage('Warehouse created successfully!');
-      return true; // nincs JSON
+      return true;
     }
     const updatedWarehouse: IWarehouse = await response.json();
     onUpdate?.(updatedWarehouse as any);
@@ -69,12 +69,12 @@ export default function CreateWarehouseDialog<T>({
     setAlertSeverity('success');
     setAlertMessage('Warehouse created successfully!');
 
-    return true; // siker jelzés
+    return true;
   } catch (error: any) {
     console.error("Error creating warehouse:", error.message);
     setAlertSeverity('error');
     setAlertMessage(error.message);
-    return false; // sikertelen
+    return false; 
   }
 };
 
@@ -89,7 +89,6 @@ export default function CreateWarehouseDialog<T>({
   }
 };
 
-
   return (
     <>
       <Button variant="outlined" onClick={handleClickOpen} className="createButton">
@@ -103,7 +102,7 @@ export default function CreateWarehouseDialog<T>({
 
           {alertMessage && (
             <Alert
-              icon={<CheckIcon fontSize="inherit" />}
+              icon={<BlockIcon fontSize="inherit" />}
               severity={alertSeverity}
               onClose={() => setAlertMessage(null)}
               style={{ marginBottom: '1rem' }}

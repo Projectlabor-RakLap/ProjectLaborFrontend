@@ -21,13 +21,25 @@ function Statistics() {
   const [stockChanges, setStockChanges] = React.useState<IStockChange[]>([]);
   const [weeklyData, setWeeklyData] = React.useState<IStockChange[]>([]);
   const [stock, setStock] = React.useState<IStock>();
-  const [selectedWarehouse, setSelectedWarehouse] = React.useState<string | ''>('');
-  const [selectedProduct, setSelectedProduct] = React.useState<string | ''>('');
+  const [selectedWarehouse, setSelectedWarehouse] = React.useState<number | null>();
+  const [selectedProduct, setSelectedProduct] = React.useState<number | null>();
   const [loadingWarehouses, setLoadingWarehouses] = React.useState(true);
   const [loadingProducts, setLoadingProducts] = React.useState(false);
   const [loadingStockChanges, setLoadingStockChanges] = React.useState(false);
   const [loadingStock, setLoadingStock] = React.useState(false);
   const [loadingWeeklyData, setLoadingWeeklyData] = React.useState(false);
+
+  const getSelectedWarehouseName = () => {
+    if (!selectedWarehouse) return '';
+    const warehouse = warehouses.find(w => w.id === selectedWarehouse);
+    return warehouse ? warehouse.name : '';
+  };
+
+  const getSelectedProductName = () => {
+    if (!selectedProduct) return '';
+    const product = products.find(p => p.id === selectedProduct);
+    return product ? product.name : '';
+  };
 
   useEffect(() => {
     const fetchWarehouses = async () => {
@@ -48,7 +60,7 @@ function Statistics() {
 
   const handleChangeWarehouse = (event: any) => {
     setSelectedWarehouse(event.target.value);
-    setSelectedProduct('');
+    setSelectedProduct(null);
     setProducts([]);
     setStockChanges([]);
   };
@@ -107,7 +119,7 @@ function Statistics() {
           `https://localhost:7116/api/stockchange/warehouse-product/${selectedProduct}-${selectedWarehouse}`
         );
         const data = await response.json();
-        setStockChanges(data);
+        setStockChanges(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error fetching stock changes:', error);
       }finally {
@@ -128,7 +140,6 @@ function Statistics() {
         );
         const data = await response.json();
         setStock(data);
-        console.log(data);
       } catch (error) {
         console.error('Error fetching stock:', error);
       } finally {
@@ -221,7 +232,7 @@ function Statistics() {
               if (!selected) {
                 return <span style={{ color: '#888' }}>Select a warehouse</span>;
               }
-              return selected;
+              return getSelectedWarehouseName();
             }}
             sx={{
               width: 300,
@@ -233,7 +244,7 @@ function Statistics() {
             inputProps={{ id: 'warehouse-select' }}
           >
             {warehouses.map((warehouse) => (
-              <MenuItem key={warehouse.name} value={warehouse.name}>
+              <MenuItem key={warehouse.name} value={warehouse.id}>
                 {warehouse.name}
               </MenuItem>
             ))}
@@ -265,7 +276,7 @@ function Statistics() {
                   if (!selected) {
                     return <span style={{ color: '#888' }}>Select a product</span>;
                   }
-                  return selected;
+                  return getSelectedProductName();
                 }}
                 sx={{
                   width: 300,
@@ -277,7 +288,7 @@ function Statistics() {
                 inputProps={{ id: 'product-select' }}
               >
                 {products.map((product) => (
-                  <MenuItem key={product.name} value={product.name}>
+                  <MenuItem key={product.name} value={product.id}>
                     {product.name}
                   </MenuItem>
                 ))}

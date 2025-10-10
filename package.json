@@ -16,6 +16,7 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@zxing/browser": "^0.1.5",
     "chance": "^1.1.13",
     "gsap": "^3.13.0",
     "react": "^19.2.0",

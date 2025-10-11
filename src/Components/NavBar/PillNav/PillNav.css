@@ -2,7 +2,6 @@
   position: fixed;
   top: 0.2em;
   z-index: 99;
-  
 }
 
 @media (max-width: 768px) {
@@ -44,9 +43,7 @@
 .pill-logo {
   width: var(--nav-h);
   height: var(--nav-h);
-  
   background: var(--base, #000);
-
   display: inline-flex;
   align-items: center;
   justify-content: center;

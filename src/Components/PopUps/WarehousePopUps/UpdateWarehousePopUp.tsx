@@ -9,21 +9,21 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Alert from '@mui/material/Alert';
 import BlockIcon from '@mui/icons-material/Block';
 import '../PopUpCSS.css';
-import { IWarehouse } from '../../../interfaces/IWarehouse';
+import { IWarehouse, IUpdateWarehouse } from '../../../interfaces/IWarehouse';
+import api from '../../../api/api';
 
-interface FormDialogProps<T> {
+interface FormDialogProps {
   id: number;
   text: string;
   dialogTitle: string;
   dialogContent: string;
   acceptText: string;
   cancelText: string;
-  initialValues: T;
-  apiUrl:string;
-  onUpdate?: (updated: T) => void;
+  initialValues: IWarehouse;
+  onUpdate?: (updated: IWarehouse) => void;
 }
 
-export default function UpdateWarehouseDialog<T>({
+export default function UpdateWarehouseDialog({
   id,
   text,
   dialogTitle,
@@ -31,64 +31,51 @@ export default function UpdateWarehouseDialog<T>({
   acceptText,
   cancelText,
   initialValues,
-  apiUrl,
-  onUpdate
-}: FormDialogProps<T>) {
+  onUpdate,
+}: FormDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState<string | null>(null);
   const [alertSeverity, setAlertSeverity] = React.useState<'success' | 'error'>('success');
+
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const updateWarehouse = async (id:number ,updatedData: Partial<IWarehouse>) => {
-  try {
-    const response = await fetch(`${apiUrl}/api/warehouse/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(updatedData),
-    });
+  const updateWarehouse = async (id: number, updatedData: IUpdateWarehouse) => {
+    try {
+      const response = await api.Warehouses.updateWarehouse(id, updatedData);
 
-    if (!response.ok) {
-      let errorMessage = `HTTP error! Status: ${response.status}`;
-      try {
-        const text = await response.text();
-        if (text) {
-          const data = JSON.parse(text);
-          if (data?.message) errorMessage = data.message;
-          else errorMessage = text;
-        }
-      } catch {}
-      throw new Error(errorMessage);
-    }
-    if (response.status >= 200 && response.status < 300) {
+      const updatedWarehouse: IWarehouse = response.data;
+
       setAlertSeverity('success');
-      setAlertMessage('Warehouse created successfully!');
+      setAlertMessage('Warehouse updated successfully!');
+      onUpdate?.(updatedWarehouse);
+
       return true;
+    } catch (error: any) {
+      console.error('Error updating warehouse:', error.message || error);
+      setAlertSeverity('error');
+      setAlertMessage(error.message || 'Unknown error');
+      return false;
     }
-    const updatedWarehouse: IWarehouse = await response.json();
-    onUpdate?.(updatedWarehouse as any);
-
-    setAlertSeverity('success');
-    setAlertMessage('Warehouse created successfully!');
-
-    return true;
-  } catch (error: any) {
-    console.error("Error creating warehouse:", error.message);
-    setAlertSeverity('error');
-    setAlertMessage(error.message);
-    return false; 
-  }
-};
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const formJson = Object.fromEntries(formData.entries());
-    const success = await updateWarehouse(id,formJson);
+    
+      const newWarehouse: IUpdateWarehouse = {
+        name: formData.get("name") as string | null,
+        location: formData.get("location") as string | null,
+      };
+      if(newWarehouse.name !== undefined && newWarehouse.name !== null && newWarehouse.name.length === 0){
+        newWarehouse.name = null;
+      }
+      if(newWarehouse.location !== undefined && newWarehouse.location !== null && newWarehouse.location.length === 0){
+        newWarehouse.location = null;
+      }
+      const success = await updateWarehouse(id,newWarehouse);
     if (success) {
+      handleClose();
       window.location.reload();
     }
   };
@@ -98,12 +85,15 @@ export default function UpdateWarehouseDialog<T>({
       <Button variant="outlined" onClick={handleClickOpen} className="updateButton">
         {text}
       </Button>
+
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{dialogTitle}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {dialogContent.replace('{name}', (initialValues as any).name)}
-            {alertMessage && (
+            {dialogContent.replace('{name}', initialValues.name)}
+          </DialogContentText>
+
+          {alertMessage && (
             <Alert
               icon={<BlockIcon fontSize="inherit" />}
               severity={alertSeverity}
@@ -113,7 +103,7 @@ export default function UpdateWarehouseDialog<T>({
               {alertMessage}
             </Alert>
           )}
-          </DialogContentText>
+
           <form onSubmit={handleSubmit} id="warehouse-form">
             <TextField
               autoFocus
@@ -124,7 +114,7 @@ export default function UpdateWarehouseDialog<T>({
               type="text"
               fullWidth
               variant="standard"
-              defaultValue={(initialValues as any).name}
+              defaultValue={initialValues.name}
             />
             <TextField
               margin="dense"
@@ -134,13 +124,18 @@ export default function UpdateWarehouseDialog<T>({
               type="text"
               fullWidth
               variant="standard"
-              defaultValue={(initialValues as any).location}
+              defaultValue={initialValues.location}
             />
           </form>
         </DialogContent>
+
         <DialogActions>
-          <Button onClick={handleClose} className="cancelButton">{cancelText}</Button>
-          <Button type="submit" form="warehouse-form" className="acceptButton">{acceptText}</Button>
+          <Button onClick={handleClose} className="cancelButton">
+            {cancelText}
+          </Button>
+          <Button type="submit" form="warehouse-form" className="acceptButton">
+            {acceptText}
+          </Button>
         </DialogActions>
       </Dialog>
     </>

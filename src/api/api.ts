@@ -1,9 +1,7 @@
-import { IProduct } from "../interfaces/IProduct";
-import { ICreateProduct } from "../interfaces/ICreateProduct";
-import { IWarehouse } from "../interfaces/IWarehouse";
-import { ICreateWarehouse } from "../interfaces/ICreateWarehouse";
-import { ICreateStock, IUpdateStock } from "../interfaces/IUpsertStock";
-import { IStock } from "../interfaces/IStock";
+import { IProduct, ICreateProduct, IUpdateProduct } from "../interfaces/IProduct";
+import { IWarehouse, ICreateWarehouse, IUpdateWarehouse } from "../interfaces/IWarehouse";
+import { IStock, ICreateStock, IUpdateStock } from "../interfaces/IStock";
+import { IStockChange, ICreateStockChange, IUpdateStockChange } from "../interfaces/IStockChange";
 import axiosInstance from "./axois.config";
 
 const Products = {
@@ -11,48 +9,34 @@ const Products = {
     getProduct: (id: number) => axiosInstance.get<IProduct>(`/api/product/${id}`),
     deleteProduct: (id: number) => axiosInstance.delete<void>(`/api/product/${id}`),
     createProduct: (param: ICreateProduct) => axiosInstance.post<IProduct>(`/api/product`, param),
-    updateProduct: (id: number, param2 :
-        {
-            ean: string | null;
-            name: string | null;
-            description: string | null;
-            image: string | null;
-        }) => axiosInstance.patch<IProduct>(`/api/prduct/${id}`, param2)
+    updateProduct: (id: number, param2 : IUpdateProduct) => axiosInstance.patch<IProduct>(`/api/product/${id}`, param2)
 }
 
 const Warehouses = {
-    getWarehouses: () => axiosInstance.get<IWarehouse[]>(`api/warehouse`),
-    getWarehouse: (id: number) => axiosInstance.get<IWarehouse>(`api/warehouse/${id}`),
-    deleteWarehouse: (id: number) => axiosInstance.delete<IWarehouse>(`api/warehouse/${id}`),
+    getWarehouses: () => axiosInstance.get<IWarehouse[]>(`/api/warehouse`),
+    getWarehouse: (id: number) => axiosInstance.get<IWarehouse>(`/api/warehouse/${id}`),
+    deleteWarehouse: (id: number) => axiosInstance.delete<IWarehouse>(`/api/warehouse/${id}`),
     createWarehouse: (param: ICreateWarehouse) => axiosInstance.post<IWarehouse>(`/api/warehouse`,param),
-    updateWarehouse: (id: number, param2:{
-        name: string | null;
-        location: string |null;
-    }) => axiosInstance.patch<IWarehouse>(`/api/warehouse/${id}`, param2)
+    updateWarehouse: (id: number, param2: IUpdateWarehouse) => axiosInstance.patch<IWarehouse>(`/api/warehouse/${id}`, param2)
 } 
 
 const Stocks = {
-    getStocks: () => axiosInstance.get<IStock[]>(`api/stock`),
-    getStock: (id: number) => axiosInstance.get<IStock>(`api/stock/${id}`),
-    getStockByWarehouse: (id: number) => axiosInstance.get<IStock>(`api/stock/get-stock-by-warehouse/${id}`),
+    getStocks: () => axiosInstance.get<IStock[]>(`/api/stock`),
+    getStock: (id: number) => axiosInstance.get<IStock>(`/api/stock/${id}`),
+    getStockByWarehouse: (id: number) => axiosInstance.get<IStock>(`/api/stock/get-stock-by-warehouse/${id}`),
+    deleteStock: (id: number) => axiosInstance.delete<void>(`/api/stock/${id}`),
     createStock: (param: ICreateStock) => axiosInstance.post<ICreateStock>(`/api/stock`, param),
-    updateStock:  (id: number, param2: {
-        stockInWarehouse: number | null;
-        stockInStore: number | null;
-        wareHouseCapacity: number | null;
-        storeCapacity: number | null;
-        price: number | null;
-        transportCost: number | null;
-        storageCost: number | null;
-        currency: string | null;
-        productId: number | null;
-        warehouseId: number | null;
-    }) => axiosInstance.patch<IUpdateStock>(`/api/stock/${id}`,param2)
+    updateStock:  (id: number, param2: IUpdateStock) => axiosInstance.patch<IUpdateStock>(`/api/stock/${id}`,param2)
 }
 
 const StockChanges = {
-    
+    getStockChanges: () => axiosInstance.get<IStockChange[]>(`/api/stockchange`),
+    getStockChange: (id: number) => axiosInstance.get<IStockChange>(`/api/stockchange/${id}`),
+    getStockChangeByWarehouse: (id: number) => axiosInstance.get<IStockChange>(`/api/stockchange/get-change-by-warehouse/${id}`),
+    deleteStockChange: (id: number) => axiosInstance.delete<void>(`/api/stockchange/${id}`),
+    createStockChange: (param: ICreateStockChange) => axiosInstance.post<ICreateStockChange>(`/api/stockchange`, param),
+    updateStockChange:  (id: number, param2: IUpdateStockChange) => axiosInstance.patch<IUpdateStockChange>(`/api/stockchange/${id}`,param2)
 }
-const api = {Products, Warehouses, Stocks}
+const api = {Products, Warehouses, Stocks, StockChanges}
 
-export default {api}
+export default api;

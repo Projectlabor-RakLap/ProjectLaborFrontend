@@ -9,7 +9,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Alert from '@mui/material/Alert';
 import BlockIcon from '@mui/icons-material/Block';
 import '../PopUpCSS.css';
-import { IWarehouse } from '../../../interfaces/IWarehouse';
+import { IWarehouse, ICreateWarehouse } from '../../../interfaces/IWarehouse';
+import api from '../../../api/api';
 
 interface FormDialogProps<T> {
   text: string;
@@ -17,8 +18,7 @@ interface FormDialogProps<T> {
   dialogContent: string;
   acceptText: string;
   cancelText: string;
-  apiUrl: string
-  onUpdate?: (updated: T) => void;
+  onUpdate?: (updated: IWarehouse) => void;
 }
 
 export default function CreateWarehouseDialog<T>({
@@ -27,7 +27,6 @@ export default function CreateWarehouseDialog<T>({
   dialogContent,
   acceptText,
   cancelText,
-  apiUrl,
   onUpdate,
 }: FormDialogProps<T>) {
   const [open, setOpen] = React.useState(false);
@@ -37,55 +36,53 @@ export default function CreateWarehouseDialog<T>({
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const createWarehouse = async (updatedData: Partial<IWarehouse>) => {
+  const createWarehouse = async (updatedData: ICreateWarehouse) => {
   try {
-    const response = await fetch(`${apiUrl}/api/warehouse`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(updatedData),
-    });
+    const response = await api.Warehouses.createWarehouse(updatedData);
 
-    if (!response.ok) {
-      let errorMessage = `HTTP error! Status: ${response.status}`;
-      try {
-        const text = await response.text();
-        if (text) {
-          const data = JSON.parse(text);
-          if (data?.message) errorMessage = data.message;
-          else errorMessage = text;
-        }
-      } catch {}
-      throw new Error(errorMessage);
-    }
     if (response.status >= 200 && response.status < 300) {
-      setAlertSeverity('success');
-      setAlertMessage('Warehouse created successfully!');
+      setAlertSeverity("success");
+      setAlertMessage("Warehouse created successfully!");
+
+      const createdWarehouse = response.data;
+      onUpdate?.(createdWarehouse);
       return true;
     }
-    const updatedWarehouse: IWarehouse = await response.json();
-    onUpdate?.(updatedWarehouse as any);
 
-    setAlertSeverity('success');
-    setAlertMessage('Warehouse created successfully!');
+    throw new Error(`Unexpected status code: ${response.status}`);
 
-    return true;
   } catch (error: any) {
-    console.error("Error creating warehouse:", error.message);
-    setAlertSeverity('error');
-    setAlertMessage(error.message);
-    return false; 
+    console.error("Error creating warehouse:", error);
+
+    let message = "Unknown error occurred.";
+
+    if (error.response) {
+      message = error.response.data?.message || `HTTP ${error.response.status}`;
+    } else if (error.request) {
+      message = "No response from server.";
+    } else {
+      message = error.message;
+    }
+
+    setAlertSeverity("error");
+    setAlertMessage(message);
+    return false;
   }
 };
 
+
  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   event.preventDefault();
-  const formData = new FormData(event.currentTarget);
-  const formJson = Object.fromEntries(formData.entries()) as Partial<IWarehouse>;
 
-  const success = await createWarehouse(formJson);
+  const formData = new FormData(event.currentTarget);
+
+  const newWarehouse: ICreateWarehouse = {
+    name: formData.get("name") as string,
+    location: formData.get("location") as string,
+  };
+
+  const success = await createWarehouse(newWarehouse);
+
   if (success) {
     window.location.reload();
   }

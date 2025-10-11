@@ -6,14 +6,11 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Alert from '@mui/material/Alert';
+import BlockIcon from '@mui/icons-material/Block';
 import '../PopUpCSS.css';
-
-export interface IProduct {
-  ean: string;
-  name: string;
-  description: string;
-  image: string;
-}
+import  api  from '../../../api/api';
+import { ICreateProduct } from '../../../interfaces/IProduct';
 
 interface FormDialogProps<T> {
   text: string;
@@ -23,7 +20,6 @@ interface FormDialogProps<T> {
   cancelText: string;
   defaultEAN?: string;
   open?: boolean;
-  apiUrl:string;
   onClose?: () => void;
   onUpdate?: (updated: T) => void;
 }
@@ -36,11 +32,12 @@ export default function CreateProductDialog<T>({
   cancelText,
   defaultEAN,
   open = false,
-  apiUrl,
   onClose,
   onUpdate,
 }: FormDialogProps<T>) {
   const [base64Image, setBase64Image] = React.useState<string>('');
+  const [alertMessage, setAlertMessage] = React.useState<string | null>(null);
+  const [alertSeverity, setAlertSeverity] = React.useState<'success' | 'error'>('success');
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -51,50 +48,41 @@ export default function CreateProductDialog<T>({
     reader.readAsDataURL(file);
   };
 
-  const createProduct = async (newProduct: Partial<IProduct>) => {
+  const createProduct = async (newProduct: ICreateProduct) => {
     try {
-        const response = await fetch(`${apiUrl}/api/product`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-        },
-        body: JSON.stringify(newProduct),
-        });
+      const response = await api.Products.createProduct(newProduct);
+      const createdProduct = response.data;
 
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      setAlertSeverity('success');
+      setAlertMessage('Product created successfully!');
+      onUpdate?.(createdProduct as any);
 
-        let createdProduct: IProduct | null = null;
-        try {
-        createdProduct = await response.json();
-        } catch {
-        console.warn('No product returned from POST; fetching by EAN...');
-        }
-
-        if (!createdProduct && newProduct.ean) {
-        const fetchResponse = await fetch(`${apiUrl}/api/product/ean/${newProduct.ean}`);
-        if (fetchResponse.ok) {
-            createdProduct = await fetchResponse.json();
-        }
-        }
-
-        if (createdProduct) {
-        onUpdate?.(createdProduct as any);
-        console.log('Product created:', createdProduct);
-        } else {
-        console.warn('Could not retrieve created product details.');
-        }
-    } catch (error) {
-        console.error('Error creating product:', error);
+      console.log('Product created:', createdProduct);
+      return true;
+    } catch (error: any) {
+      console.error('Error creating product:', error);
+      setAlertSeverity('error');
+      setAlertMessage(
+        error.response?.data?.message || error.message || 'An unknown error occurred while creating the product.'
+      );
+      return false;
     }
-    };
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const formJson = Object.fromEntries(formData.entries());
-    const productData = { ...formJson, image: base64Image };
-    await createProduct(productData);
+    const newProduct : ICreateProduct = {
+          name: formData.get("name") as string,
+          ean: formData.get("ean") as string,
+          description: formData.get("description") as string,
+          image: base64Image
+        }
+    const success = await createProduct(newProduct);
+    if (success) {
+      setTimeout(() => window.location.reload(), 1000);
+    }
   };
 
   return (
@@ -102,6 +90,17 @@ export default function CreateProductDialog<T>({
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent>
         <DialogContentText>{dialogContent}</DialogContentText>
+
+        {alertMessage && (
+          <Alert
+            icon={<BlockIcon fontSize="inherit" />}
+            severity={alertSeverity}
+            onClose={() => setAlertMessage(null)}
+            style={{ marginBottom: '1rem' }}
+          >
+            {alertMessage}
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit} id="product-form">
           <TextField

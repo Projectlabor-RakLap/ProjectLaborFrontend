@@ -5,7 +5,7 @@ import VirtuosoTable, { ColumnData } from '../../Components/DataTable/DataTable'
 import CreateProductDialog from '../../Components/PopUps/ProductPopUps/CreateProductPopUp';
 import UpdateProductDialog from '../../Components/PopUps/ProductPopUps/UpdateProductPopUp';
 import DeleteProductDialog from '../../Components/PopUps/ProductPopUps/DeleteProductPopUp';
-
+import api from '../../api/api';
 
 const productColumns: ColumnData<IProduct>[] = [
   { dataKey: 'id', label: 'id', width: 50 },
@@ -28,19 +28,14 @@ function useWindowHeight() {
 }
 
 export default function Products() {
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const apiBaseUrl = `https://${window.location.hostname}:7116`;
+ const [products, setProducts] = useState<IProduct[]>([]);
   const height = useWindowHeight();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${apiBaseUrl}/api/product`, {
-          headers: { Accept: "application/json" },
-        });
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const data: IProduct[] = await response.json();
-        setProducts(data);
+        const response = await api.Products.getProducts();
+        setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -50,10 +45,18 @@ export default function Products() {
 
   const handleUpdate = (updated: IProduct) => {
     setProducts(prev =>
-      prev.map(w => (w.id === updated.id ? { ...w, ...updated } : w))
+      prev.map(p => (p.id === updated.id ? { ...p, ...updated } : p))
     );
   };
 
+  const handleDelete = (deleted: IProduct) => {
+    setProducts(prev => prev.filter(p => p.id !== deleted.id));
+  };
+
+  const handleCreate = (created: IProduct) => {
+    setProducts(prev => [...prev, created]);
+  };
+  
   return (
     <div className="App">
       <header className="App-header">
@@ -72,7 +75,6 @@ export default function Products() {
               acceptText="Update"
               cancelText="Cancel"
               initialValues={row}
-              apiUrl={apiBaseUrl}
               onUpdate={handleUpdate}
 
             />
@@ -85,7 +87,6 @@ export default function Products() {
             dialogContent={`Are you sure you want to delete ${row.name} product?`}
             acceptText="Delete"
             cancelText="Cancel"
-            apiUrl={apiBaseUrl}
             onUpdate={handleUpdate}
           />)}
           createButton={(
@@ -95,7 +96,6 @@ export default function Products() {
             dialogContent={`Please add a name and a location`}
             acceptText="Create"
             cancelText="Cancel"
-            apiUrl={apiBaseUrl}
             onUpdate={handleUpdate}
             />
           )} 

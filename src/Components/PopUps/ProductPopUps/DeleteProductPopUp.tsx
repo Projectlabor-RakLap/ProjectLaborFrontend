@@ -5,8 +5,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Alert from '@mui/material/Alert';
+import BlockIcon from '@mui/icons-material/Block';
 import '../PopUpCSS.css';
-import { IWarehouse } from '../../../interfaces/IWarehouse';
+import  api  from '../../../api/api';
 
 interface FormDialogProps<T> {
   id: number;
@@ -15,7 +17,6 @@ interface FormDialogProps<T> {
   dialogContent: string;
   acceptText: string;
   cancelText: string;
-  apiUrl:string;
   onUpdate?: (updated: T) => void;
 }
 
@@ -26,37 +27,31 @@ export default function DeleteProductDialog<T>({
   dialogContent,
   acceptText,
   cancelText,
-  apiUrl,
-  onUpdate
+  onUpdate,
 }: FormDialogProps<T>) {
   const [open, setOpen] = React.useState(false);
+  const [alertMessage, setAlertMessage] = React.useState<string | null>(null);
+  const [alertSeverity, setAlertSeverity] = React.useState<'success' | 'error'>('success');
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const deleteWarehouse = async (id:number) => {
+  const handleDelete = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/warehouse/${id}`, {
-        method: "DELETE",
-        headers: {
-          Accept: "application/json",
-        }
-      });
+      await api.Products.deleteProduct(id);
 
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      setAlertSeverity('success');
+      setAlertMessage('Product deleted successfully!');
+      onUpdate?.(null as any);
 
-      const deletedWarehouse: IWarehouse = await response.json();
-
-      onUpdate?.(deletedWarehouse as any);
-    } catch (error) {
-      console.error("Error deleting warehouse:", error);
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error: any) {
+      console.error('Error deleting product:', error);
+      setAlertSeverity('error');
+      setAlertMessage(
+        error.response?.data?.message || error.message || 'An unknown error occurred while deleting product.'
+      );
     }
-  };
-
-  const handleDelete = () => {
-    deleteWarehouse(id);
-    handleClose();
-    window.location.reload();
   };
 
   return (
@@ -67,14 +62,26 @@ export default function DeleteProductDialog<T>({
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{dialogTitle}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            {dialogContent}
-          </DialogContentText>
-          
+          <DialogContentText>{dialogContent}</DialogContentText>
+
+          {alertMessage && (
+            <Alert
+              icon={<BlockIcon fontSize="inherit" />}
+              severity={alertSeverity}
+              onClose={() => setAlertMessage(null)}
+              style={{ marginTop: '1rem' }}
+            >
+              {alertMessage}
+            </Alert>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} className="cancelDeleteButton">{cancelText}</Button>
-          <Button onClick={handleDelete} type="submit" form="warehouse-form" className="deleteButton">{acceptText}</Button>
+          <Button onClick={handleClose} className="cancelDeleteButton">
+            {cancelText}
+          </Button>
+          <Button onClick={handleDelete} className="deleteButton">
+            {acceptText}
+          </Button>
         </DialogActions>
       </Dialog>
     </>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import api from '../../api/api';
 import PillNavFull from '../../Components/NavBar/PillNav/PillNavWithItems';
 import { IWarehouse } from '../../interfaces/IWarehouse';
 import VirtuosoTable, { ColumnData } from '../../Components/DataTable/DataTable';
@@ -26,24 +27,19 @@ function useWindowHeight() {
 
 export default function Warehouses() {
   const [warehouses, setWarehouses] = useState<IWarehouse[]>([]);
-  const apiBaseUrl = `https://${window.location.hostname}:7116`;
   const height = useWindowHeight();
 
-  useEffect(() => {
-    const fetchWarehouses = async () => {
-      try {
-        const response = await fetch(`${apiBaseUrl}/api/warehouse`, {
-          headers: { Accept: "application/json" },
-        });
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const data: IWarehouse[] = await response.json();
-        setWarehouses(data);
-      } catch (error) {
-        console.error("Error fetching warehouses:", error);
-      }
-    };
-    fetchWarehouses();
-  }, []);
+ useEffect(() => {
+  const fetchWarehouses = async () => {
+    try {
+      const response = await api.Warehouses.getWarehouses();
+      setWarehouses(response.data);
+    } catch (error) {
+      console.error("Error fetching warehouses:", error);
+    }
+  };
+  fetchWarehouses();
+}, []);
 
   const handleUpdate = (updated: IWarehouse) => {
     setWarehouses(prev =>
@@ -69,7 +65,6 @@ export default function Warehouses() {
               acceptText="Update"
               cancelText="Cancel"
               initialValues={row}
-              apiUrl={apiBaseUrl}
               onUpdate={handleUpdate}
             />
           )}
@@ -81,7 +76,6 @@ export default function Warehouses() {
             dialogContent={`Are you sure you want to delete ${row.name} warehouse?`}
             acceptText="Delete"
             cancelText="Cancel"
-            apiUrl={apiBaseUrl}
             onUpdate={handleUpdate}
           />)}
           createButton={(
@@ -91,7 +85,6 @@ export default function Warehouses() {
             dialogContent={`Please add a name and a location`}
             acceptText="Create"
             cancelText="Cancel"
-            apiUrl={apiBaseUrl}
             onUpdate={handleUpdate}
             />
           )} 

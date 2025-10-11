@@ -7,6 +7,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import '../PopUpCSS.css';
 import { IWarehouse } from '../../../Interfaces/IWarehouse';
+import api from '../../../api/api'
 
 interface FormDialogProps {
   id: number;

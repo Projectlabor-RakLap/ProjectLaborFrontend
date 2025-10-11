@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import logo from '../../logo.svg';
+import { useState } from 'react';
 import '../../App.css';
 import PillNavFull from '../../Components/NavBar/PillNav/PillNavWithItems';
 import { Button } from '@mui/material';
-import CreateProductDialog from '../../Components/PopUps/ProductPopUp/CreateProductPopUp';
+import CreateProductDialog from '../../Components/PopUps/ProductPopUps/CreateProductPopUp';
 import CreateStockChangeDialog from '../../Components/PopUps/StockChangePopUp/CreateStockChangePopUp';
 import ScannerDialog from '../../Components/Scanner/Scanner';
 import { IProduct } from '../../Interfaces/IProduct';
-import { waitFor } from '@testing-library/dom';
 
 function StockChange() {
   const [scannerOpen, setScannerOpen] = useState(false);

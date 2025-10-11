@@ -6,7 +6,7 @@ import { Button } from '@mui/material';
 import CreateProductDialog from '../../Components/PopUps/ProductPopUp/CreateProductPopUp';
 import CreateStockChangeDialog from '../../Components/PopUps/StockChangePopUp/CreateStockChangePopUp';
 import ScannerDialog from '../../Components/Scanner/Scanner';
-import { IProduct } from '../../interfaces/IProduct';
+import { IProduct } from '../../Interfaces/IProduct';
 import { waitFor } from '@testing-library/dom';
 
 function StockChange() {

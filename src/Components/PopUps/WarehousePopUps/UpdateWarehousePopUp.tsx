@@ -9,7 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Alert from '@mui/material/Alert';
 import BlockIcon from '@mui/icons-material/Block';
 import '../PopUpCSS.css';
-import { IWarehouse } from '../../../interfaces/IWarehouse';
+import { IWarehouse } from '../../../Interfaces/IWarehouse';
 
 interface FormDialogProps<T> {
   id: number;

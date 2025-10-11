@@ -13,7 +13,7 @@ import FormControl from '@mui/material/FormControl';
 import './../PopUpCSS.css';
 import { Alert, Snackbar } from '@mui/material';
 import { JSX } from 'react';
-import { IWarehouse } from '../../../interfaces/IWarehouse';
+import { IWarehouse } from '../../../Interfaces/IWarehouse';
 
 interface IProduct {
   id: number;

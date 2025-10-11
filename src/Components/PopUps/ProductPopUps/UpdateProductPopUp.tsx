@@ -10,7 +10,7 @@ import Alert from '@mui/material/Alert';
 import BlockIcon from '@mui/icons-material/Block';
 import InputFileUpload from '../../Inputs/FileInput';
 import '../PopUpCSS.css';
-import { IProduct } from '../../../interfaces/IProduct';
+import { IProduct } from '../../../Interfaces/IProduct';
 
 interface FormDialogProps<T> {
   id: number;

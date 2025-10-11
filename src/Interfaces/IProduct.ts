@@ -1,9 +1,8 @@
-interface IProduct{
+export interface IProduct{
     id: number;
-    EAN: string;
+    ean: string;
     name: string;
-    Description: string
-    ImageBase64: string | null;
+    description: string
+    image: string | null;
 }
 
-export default IProduct;

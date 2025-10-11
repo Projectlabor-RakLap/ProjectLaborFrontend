@@ -1,4 +1,4 @@
-interface IStock {
+export interface IStock {
     id : number;
     stockInWarehouse: number;
     stockInStore: number;
@@ -10,4 +10,3 @@ interface IStock {
     warehouseId: number;
 }
 
-export default IStock;

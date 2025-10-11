@@ -6,8 +6,8 @@ import Warehouses from './app/Warehouses/page';
 import Admin from './app/Admin/page';
 import Statistics from './app/Statistics/page';
 import Profile from './app/Profile/page';
-import Products
- from './app/Products/page';
+import StockChange from './app/StockChange/page';
+import Products from './app/Products/page';
 function App() {
   return (
     <Router>
@@ -17,6 +17,7 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/statistics" element={<Statistics />} />
+        <Route path="/stock-change" element={<StockChange />} />
         <Route path="/profile" element={<Profile />} />
         
       </Routes>

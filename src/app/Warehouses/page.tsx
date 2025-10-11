@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PillNavFull from '../../Components/NavBar/PillNav/PillNavWithItems';
 import { IWarehouse } from '../../interfaces/IWarehouse';
 import VirtuosoTable, { ColumnData } from '../../Components/DataTable/DataTable';

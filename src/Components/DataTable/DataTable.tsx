@@ -80,7 +80,7 @@ const rowContent = (_index: number, row: T) => (
             {deleteButton && deleteButton(row)}
           </div>
         ) : (
-          col.dataKey === 'image' ? (<img src={`data:image/png;base64,${String(row[col.dataKey])}`} alt="Picture" />) : String(row[col.dataKey])
+          col.dataKey === 'image' ? (<img src={`data:image/png;base64,${String(row[col.dataKey])}`} alt="Unable to load" />) : String(row[col.dataKey])
           
         )}
       </TableCell>

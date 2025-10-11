@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import PillNavFull from '../../Components/NavBar/PillNav/PillNavWithItems';
-import { IWarehouse } from '../../interfaces/IWarehouse';
+import { IProduct } from '../../interfaces/IProduct';
 import VirtuosoTable, { ColumnData } from '../../Components/DataTable/DataTable';
-import UpdateWarehouseDialog from '../../Components/PopUps/WarehousePopUps/UpdateWarehousePopUp';
-import DeleteWarehouseDialog from '../../Components/PopUps/WarehousePopUps/DeleteWarehousePopUp';
-import CreateWarehouseDialog from '../../Components/PopUps/WarehousePopUps/CreateWarehousePopUp';
+import CreateProductDialog from '../../Components/PopUps/ProductPopUps/CreateProductPopUp';
+import UpdateProductDialog from '../../Components/PopUps/ProductPopUps/UpdateProductPopUp';
+import DeleteProductDialog from '../../Components/PopUps/ProductPopUps/DeleteProductPopUp';
 
-const warehouseColumns: ColumnData<IWarehouse>[] = [
+
+const productColumns: ColumnData<IProduct>[] = [
   { dataKey: 'id', label: 'id', width: 50 },
   { dataKey: 'name', label: 'Name', width: 150 },
-  { dataKey: 'location', label: 'Location', width: 150 },
+  { dataKey: 'ean', label: 'EAN', width: 150 },
+  { dataKey: 'description', label: 'Desctiption', width: 150 },
+  { dataKey: 'image', label: 'Image', width: 150 },
 ];
 
 function useWindowHeight() {
@@ -24,29 +27,29 @@ function useWindowHeight() {
   return height;
 }
 
-export default function Warehouses() {
-  const [warehouses, setWarehouses] = useState<IWarehouse[]>([]);
+export default function Products() {
+  const [products, setProducts] = useState<IProduct[]>([]);
   const apiBaseUrl = `https://${window.location.hostname}:7116`;
   const height = useWindowHeight();
 
   useEffect(() => {
-    const fetchWarehouses = async () => {
+    const fetchProducts = async () => {
       try {
-        const response = await fetch(`${apiBaseUrl}/api/warehouse`, {
+        const response = await fetch(`${apiBaseUrl}/api/product`, {
           headers: { Accept: "application/json" },
         });
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const data: IWarehouse[] = await response.json();
-        setWarehouses(data);
+        const data: IProduct[] = await response.json();
+        setProducts(data);
       } catch (error) {
-        console.error("Error fetching warehouses:", error);
+        console.error("Error fetching products:", error);
       }
     };
-    fetchWarehouses();
+    fetchProducts();
   }, []);
 
-  const handleUpdate = (updated: IWarehouse) => {
-    setWarehouses(prev =>
+  const handleUpdate = (updated: IProduct) => {
+    setProducts(prev =>
       prev.map(w => (w.id === updated.id ? { ...w, ...updated } : w))
     );
   };
@@ -56,38 +59,39 @@ export default function Warehouses() {
       <header className="App-header">
         <PillNavFull />
         <VirtuosoTable
-          data={warehouses}
-          columns={warehouseColumns}
+          data={products}
+          columns={productColumns}
           height={height * 0.85}
           onUpdate={handleUpdate}
           updateButton={(row) => (
-            <UpdateWarehouseDialog
+            <UpdateProductDialog
               id={row.id}
               text="Update"
-              dialogTitle="Warehouse update"
-              dialogContent={`Update the ${row.name} warehouse`}
+              dialogTitle="Product update"
+              dialogContent={`Update the ${row.name} product`}
               acceptText="Update"
               cancelText="Cancel"
               initialValues={row}
               apiUrl={apiBaseUrl}
               onUpdate={handleUpdate}
+
             />
           )}
           deleteButton={(row) => (
-          <DeleteWarehouseDialog
+          <DeleteProductDialog
             id={row.id}
             text="Delete"
-            dialogTitle="Delete warehouse"
-            dialogContent={`Are you sure you want to delete ${row.name} warehouse?`}
+            dialogTitle="Delete product"
+            dialogContent={`Are you sure you want to delete ${row.name} product?`}
             acceptText="Delete"
             cancelText="Cancel"
             apiUrl={apiBaseUrl}
             onUpdate={handleUpdate}
           />)}
           createButton={(
-            <CreateWarehouseDialog
+            <CreateProductDialog
             text="Create"
-            dialogTitle="Create warehouse"
+            dialogTitle="Create product"
             dialogContent={`Please add a name and a location`}
             acceptText="Create"
             cancelText="Cancel"

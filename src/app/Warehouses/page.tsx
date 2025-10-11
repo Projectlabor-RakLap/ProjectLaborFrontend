@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/api';
 import PillNavFull from '../../Components/NavBar/PillNav/PillNavWithItems';
-import { IWarehouse } from '../../interfaces/IWarehouse';
+import { IWarehouse } from '../../Interfaces/IWarehouse';
 import VirtuosoTable, { ColumnData } from '../../Components/DataTable/DataTable';
 import UpdateWarehouseDialog from '../../Components/PopUps/WarehousePopUps/UpdateWarehousePopUp';
 import DeleteWarehouseDialog from '../../Components/PopUps/WarehousePopUps/DeleteWarehousePopUp';

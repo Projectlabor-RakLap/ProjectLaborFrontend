@@ -10,7 +10,7 @@ import Alert from '@mui/material/Alert';
 import BlockIcon from '@mui/icons-material/Block';
 import InputFileUpload from '../../Inputs/FileInput';
 import '../PopUpCSS.css';
-import { IProduct, IUpdateProduct } from '../../../interfaces/IProduct';
+import { IProduct, IUpdateProduct } from '../../../Interfaces/IProduct';
 import api from '../../../api/api'; // ✅ axios instance és endpoint wrapper
 
 interface FormDialogProps {

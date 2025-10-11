@@ -1,7 +1,7 @@
-import { IProduct, ICreateProduct, IUpdateProduct } from "../interfaces/IProduct";
-import { IWarehouse, ICreateWarehouse, IUpdateWarehouse } from "../interfaces/IWarehouse";
-import { IStock, ICreateStock, IUpdateStock } from "../interfaces/IStock";
-import { IStockChange, ICreateStockChange, IUpdateStockChange } from "../interfaces/IStockChange";
+import { IProduct, ICreateProduct, IUpdateProduct } from "../Interfaces/IProduct";
+import { IWarehouse, ICreateWarehouse, IUpdateWarehouse } from "../Interfaces/IWarehouse";
+import { IStock, ICreateStock, IUpdateStock } from "../Interfaces/IStock";
+import { IStockChange, ICreateStockChange, IUpdateStockChange } from "../Interfaces/IStockChange";
 import axiosInstance from "./axois.config";
 
 const Products = {

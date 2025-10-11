@@ -4,3 +4,12 @@ export interface IWarehouse{
     location: string;
 }
 
+export interface ICreateWarehouse{
+    name: string;
+    location: string;
+}
+
+export interface IUpdateWarehouse{
+    name: string | null;
+    location: string | null;
+} 

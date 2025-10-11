@@ -10,7 +10,7 @@ import Alert from '@mui/material/Alert';
 import BlockIcon from '@mui/icons-material/Block';
 import '../PopUpCSS.css';
 import  api  from '../../../api/api';
-import { ICreateProduct } from '../../../interfaces/IProduct';
+import { ICreateProduct } from '../../../Interfaces/IProduct';
 
 interface FormDialogProps<T> {
   text: string;
